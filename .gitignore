@@ -1,0 +1,38 @@
+# --- Go + Wails ---
+build/
+build/bin/
+*.exe
+*.out
+*.test
+wailsjs/go.*.ts
+
+# --- Vue + Node ---
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# --- 환경 변수 + 로그 ---
+.env
+.env.*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- OS: macOS ---
+.DS_Store
+
+# --- OS: Windows ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.bak
+*.tmp
+*.lnk
+
+# --- IDE 설정 ---
+.vscode/
+.idea/
+*.sw?
+*.sublime-*
