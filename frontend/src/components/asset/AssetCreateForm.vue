@@ -77,15 +77,14 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { CreateAsset } from '../../../wailsjs/go/main/App'
 
 const today = new Date()
 const year = today.getFullYear()
 const month = (today.getMonth()+1).toString().padStart(2,'0')
 const date = today.getDate().toString().padStart(2,'0')
 const day = `${year}-${month}-${date}`
-
-const form = reactive({
-  // 사용자 정보
+const defaultForm = {
   corporation: '',
   department: '',
   team: '',
@@ -93,7 +92,6 @@ const form = reactive({
   position: '',
   userNote: '',
 
-  // 자산 정보
   category: '비품',
   itemType: 'PC본체',
   quantity: 1,
@@ -104,9 +102,19 @@ const form = reactive({
   assetNote: '',
   assetName: '',
   assetId: '',
-})
+};
 
+const form = reactive({ ...defaultForm })
 function submitForm() {
+    CreateAsset(JSON.stringify(form))
+    .then(() => {
+      alert('저장 완료!');
+      Object.assign(form, defaultForm) // 폼 초기화
+    })
+    .catch((err: any) => {
+      console.error('저장 오류:', err);
+      alert('저장 중 오류 발생!');
+    }); 
   console.log('제출된 폼:', JSON.stringify(form, null, 2))
   alert('폼이 제출되었습니다! (콘솔 확인)')
 }

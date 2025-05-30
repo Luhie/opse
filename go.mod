@@ -3,11 +3,14 @@ module opse
 go 1.23
 
 require (
+	github.com/go-sql-driver/mysql v1.9.2
+	github.com/joho/godotenv v1.5.1
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e
 	github.com/wailsapp/wails/v2 v2.10.1
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
