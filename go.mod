@@ -3,6 +3,7 @@ module opse
 go 1.23
 
 require (
+	github.com/StackExchange/wmi v1.2.1
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e

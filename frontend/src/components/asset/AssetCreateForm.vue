@@ -1,5 +1,5 @@
 <template>
-  <div style="min-height: 100vh; width: 100vw; display:flex; justify-content:center; align-items:center;">
+  <div style="min-height: 100vh; display:flex; justify-content:center; align-items:center;">
   <form class="form-wrapper" @submit.prevent="submitForm">
     <!-- 사용자 정보 -->
     <fieldset>
@@ -7,7 +7,12 @@
       <div class="grid-user">
         <div class="grid-item">
           <label for="corporation">법인</label>
-          <input id="corporation" v-model="form.corporation" />
+          <select id="corporation" v-model="form.corporation">
+            <option>솜인터내셔널</option>
+            <option>솜밸리</option>
+            <option>딜라잇가든</option>
+            <option>솜티앤엘</option>
+          </select>
         </div>
         <div class="grid-item">
           <label for="department">부서</label>
@@ -71,13 +76,18 @@
     </fieldset>
 
     <button type="submit">제출</button>
+    <button type="button" @click="visible = !visible">{{ visible ? '닫기' : 'PC정보 가져오기' }}</button>
   </form>
   </div>
+  <AssetDetail v-if='visible'/>
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
-import { CreateAsset } from '../../../wailsjs/go/main/App'
+import { reactive, ref } from 'vue'
+import AssetDetail from './AssetDetail.vue'
+import { CreateAsset} from '../../../wailsjs/go/main/App'
+
+const visible = ref(false)
 
 const today = new Date()
 const year = today.getFullYear()
@@ -85,7 +95,7 @@ const month = (today.getMonth()+1).toString().padStart(2,'0')
 const date = today.getDate().toString().padStart(2,'0')
 const day = `${year}-${month}-${date}`
 const defaultForm = {
-  corporation: '',
+  corporation: '솜인터내셔널',
   department: '',
   team: '',
   name: '',
@@ -166,7 +176,8 @@ label {
   width: 100%;
   padding: 0.1rem;
 
-  input{
+  input,
+  select{
     flex:1;
   }
   &:nth-child(5){

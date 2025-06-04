@@ -8,6 +8,8 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"opse/backend/system"
 )
 
 // App struct
@@ -85,4 +87,26 @@ func (a *App) CreateAsset(data string) error {
 	)
 
 	return err
+}
+
+// system
+func (a *App) GetCPUInfo() (*system.CPUInfo, error) {
+	return system.GetCPUInfo()
+}
+func (a *App) GetMotherboardInfo() (*system.MotherboardInfo, error) {
+	return system.GetMotherboardInfo()
+}
+func (a *App) GetRAMInfo() (*system.RAMInfo, error) {
+	return system.GetRAMInfo()
+}
+func (a *App) GetGPUInfo() (*system.GPUs, error) {
+	return system.GetGPUInfo()
+}
+func (a *App) GetDiskInfo() (*system.Disks, error) {
+	return system.GetDiskInfo()
+}
+
+// net work
+func (a *App) GetNetworkInfo() (*system.NetworkInfo, error) {
+	return system.GetNetworkInfo()
 }

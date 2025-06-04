@@ -5,3 +5,27 @@
 export function CreateAsset(arg1) {
   return window['go']['main']['App']['CreateAsset'](arg1);
 }
+
+export function GetCPUInfo() {
+  return window['go']['main']['App']['GetCPUInfo']();
+}
+
+export function GetDiskInfo() {
+  return window['go']['main']['App']['GetDiskInfo']();
+}
+
+export function GetGPUInfo() {
+  return window['go']['main']['App']['GetGPUInfo']();
+}
+
+export function GetMotherboardInfo() {
+  return window['go']['main']['App']['GetMotherboardInfo']();
+}
+
+export function GetNetworkInfo() {
+  return window['go']['main']['App']['GetNetworkInfo']();
+}
+
+export function GetRAMInfo() {
+  return window['go']['main']['App']['GetRAMInfo']();
+}
