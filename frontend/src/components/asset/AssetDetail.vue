@@ -179,7 +179,7 @@ async function fetchNetwork() {
     }
 }
 
-// 부모가 접근할 수 있도록 노출 (이름 오타나 빠뜨린 것이 없는지 확인)
+// 부모(AssetCreateForm) 접근할 수 있도록 노출
 defineExpose({
   CPUInfo,
   MotherboardInfo,

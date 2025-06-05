@@ -1,0 +1,20 @@
+CREATE TABLE assets (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    corporation   VARCHAR(255)    NOT NULL,
+    department    VARCHAR(255)    NOT NULL,
+    team          VARCHAR(255)    NOT NULL,
+    name          VARCHAR(255)    NOT NULL,
+    position      VARCHAR(255)    NOT NULL,
+    user_note     TEXT            NOT NULL,
+    category      VARCHAR(255)    NOT NULL,
+    item_type     VARCHAR(255)    NOT NULL,
+    quantity      INT             NOT NULL,
+    model         VARCHAR(255)    NOT NULL,
+    manufacturer  VARCHAR(255)    NOT NULL,
+    purchase_date DATE            NOT NULL,
+    `usage`       VARCHAR(50)     NOT NULL,
+    asset_note    TEXT            NOT NULL,
+    asset_name    VARCHAR(255)    NOT NULL,
+    asset_id      VARCHAR(255)    NOT NULL,
+    system_info   JSON            NOT NULL
+);

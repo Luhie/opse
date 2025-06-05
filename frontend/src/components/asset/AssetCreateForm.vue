@@ -155,18 +155,18 @@ function submitForm() {
     systemInfo
   }
   console.log(JSON.stringify(finalPayload))
-    TestAsset(JSON.stringify(finalPayload))
-  //   CreateAsset(JSON.stringify(finalPayload))
-  //   .then(() => {
-  //     alert('저장 완료!');
-  //     Object.assign(form, defaultForm) // 폼 초기화
-  //   })
-  //   .catch((err: any) => {
-  //     console.error('저장 오류:', err);
-  //     alert('저장 중 오류 발생!');
-  //   }); 
-  // console.log('제출된 폼:', JSON.stringify(form, null, 2))
-  // alert('폼이 제출되었습니다! (콘솔 확인)')
+    // TestAsset(JSON.stringify(finalPayload))
+  CreateAsset(JSON.stringify(finalPayload))
+  .then(() => {
+    alert('저장 완료!');
+    Object.assign(form, defaultForm) // 폼 초기화
+  })
+  .catch((err: any) => {
+    console.error('저장 오류:', err);
+    alert('저장 중 오류 발생!');
+  }); 
+  console.log('제출된 폼:', JSON.stringify(form, null, 2))
+  alert('폼이 제출되었습니다! (콘솔 확인)')
 }
 </script>
 <style scoped>
