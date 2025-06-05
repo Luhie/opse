@@ -15,6 +15,21 @@ CREATE TABLE assets (
     `usage`       VARCHAR(50)     NOT NULL,
     asset_note    TEXT            NOT NULL,
     asset_name    VARCHAR(255)    NOT NULL,
-    asset_id      VARCHAR(255)    NOT NULL,
-    system_info   JSON            NOT NULL
+    asset_id      VARCHAR(255)    NOT NULL
+);
+CREATE TABLE system_info (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    asset_id      INT NOT NULL,
+    
+    cpu           JSON       NOT NULL,
+    motherboard   JSON       NOT NULL,
+    ram           JSON       NOT NULL,
+    gpu           JSON       NOT NULL,
+    disk          JSON       NOT NULL,
+    network       JSON       NOT NULL,
+    
+    CONSTRAINT fk_sysinfo_asset
+      FOREIGN KEY (asset_id)
+      REFERENCES assets(id)
+      ON DELETE CASCADE
 );

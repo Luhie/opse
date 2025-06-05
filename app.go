@@ -86,7 +86,7 @@ func InitDB() error {
 func (a *App) TestAsset(data string) error {
 	var form AssetForm
 
-	if err := json.Unmarshal([]byte(data), &form); Err != nil {
+	if err := json.Unmarshal([]byte(data), &form); err != nil {
 		return err
 	}
 
@@ -98,42 +98,156 @@ func (a *App) TestAsset(data string) error {
 }
 
 func (a *App) CreateAsset(data string) error {
-
-	// JSON문자열 언마샬링
+	// ----------------------------
+	// 1) JSON 문자열 언마샬링
+	// ----------------------------
 	var form AssetForm
 	if err := json.Unmarshal([]byte(data), &form); err != nil {
-		fmt.Println(">>> CreateAsset Unmarshal Error:", err)
+		fmt.Println("▶ CreateAsset Unmarshal 오류:", err)
 		return err
 	}
 
-	// Trim 처리 함수 호출
+	// ----------------------------
+	// 2) Trim 처리 (이미 구현했다면 호출만)
+	//    → form 내부의 모든 문자열 필드 앞뒤 공백 제거
+	// ----------------------------
 	trimAssetForm(&form)
 
-	// systemInfo 구조체 다시 JSON []byte로 마샬링
-	sysInfoBytes, err := json.Marshal(form.SystemInfo)
+	// ----------------------------
+	// 3) DB 트랜잭션 시작
+	// ----------------------------
+	tx, err := db.Begin()
 	if err != nil {
-		fmt.Println(">>> systemInfo Marshal Error:", err)
+		fmt.Println("▶ 트랜잭션 시작 오류:", err)
 		return err
 	}
 
-	_, err = db.Exec(`
-		INSERT INTO assets (
-			corporation, department, team, name, position, user_note,
-			category, item_type, quantity, model, manufacturer, purchase_date,
-			`+"`usage`"+`, asset_note, asset_name, asset_id, system_info
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-		form.Corporation, form.Department, form.Team, form.Name, form.Position, form.UserNote,
-		form.Category, form.ItemType, form.Quantity, form.Model, form.Manufacturer, form.PurchaseDate,
-		form.Usage, form.AssetNote, form.AssetName, form.AssetId, string(sysInfoBytes),
+	// ----------------------------
+	// 4) assets 테이블에 기본 정보 INSERT
+	// ----------------------------
+	//    → asset_id(마지막에 생성된 PK)를 받아와서 system_info 테이블에 사용
+	res, err := tx.Exec(`
+        INSERT INTO assets (
+            corporation, department, team, name, position, user_note,
+            category, item_type, quantity, model, manufacturer, purchase_date,
+            `+"`usage`"+`, asset_note, asset_name, asset_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+		form.Corporation,
+		form.Department,
+		form.Team,
+		form.Name,
+		form.Position,
+		form.UserNote,
+		form.Category,
+		form.ItemType,
+		form.Quantity,
+		form.Model,
+		form.Manufacturer,
+		form.PurchaseDate, // MySQL DATE 타입에 맞춘 문자열
+		form.Usage,
+		form.AssetNote,
+		form.AssetName,
+		form.AssetId,
 	)
-
 	if err != nil {
-		fmt.Print(">>> CreateAsset INSERT Exec Error:", err)
+		tx.Rollback()
+		fmt.Println("▶ assets INSERT 오류:", err)
 		return err
 	}
 
-	fmt.Println(">>> CreateAsset: Success INSERT")
-	return err
+	// 마지막으로 생성된 PK (assets.id) 획득
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ LastInsertId 오류:", err)
+		return err
+	}
+
+	// ----------------------------
+	// 5) system_info 테이블에 JSON 별도 INSERT
+	// ----------------------------
+	//    form.SystemInfo 내부의 각 부분(CPU, Motherboard, RAM, GPU, Disk, Network)을
+	//    json.Marshal 한 뒤, asset_id=lastID 값과 함께 INSERT
+
+	// 5-1) CPU 정보만 JSON으로
+	cpuJSON, err := json.Marshal(form.SystemInfo.CPU)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ CPU JSON 마샬링 오류:", err)
+		return err
+	}
+
+	// 5-2) Motherboard 정보만 JSON으로
+	mbJSON, err := json.Marshal(form.SystemInfo.Motherboard)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ Motherboard JSON 마샬링 오류:", err)
+		return err
+	}
+
+	// 5-3) RAM 전체 정보 (슬라이스 포함) JSON으로
+	ramJSON, err := json.Marshal(form.SystemInfo.RAM)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ RAM JSON 마샬링 오류:", err)
+		return err
+	}
+
+	// 5-4) GPU 전체 정보 JSON으로
+	gpuJSON, err := json.Marshal(form.SystemInfo.GPU)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ GPU JSON 마샬링 오류:", err)
+		return err
+	}
+
+	// 5-5) Disk 전체 정보 JSON으로
+	diskJSON, err := json.Marshal(form.SystemInfo.Disk)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ Disk JSON 마샬링 오류:", err)
+		return err
+	}
+
+	// 5-6) Network 전체 정보 JSON으로
+	netJSON, err := json.Marshal(form.SystemInfo.Network)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ Network JSON 마샬링 오류:", err)
+		return err
+	}
+
+	// 이제 system_info 테이블로 INSERT
+	_, err = tx.Exec(`
+        INSERT INTO system_info (
+            asset_id, cpu, motherboard, ram, gpu, disk, network
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+		lastID,
+		string(cpuJSON),
+		string(mbJSON),
+		string(ramJSON),
+		string(gpuJSON),
+		string(diskJSON),
+		string(netJSON),
+	)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ system_info INSERT 오류:", err)
+		return err
+	}
+
+	// ----------------------------
+	// 6) 트랜잭션 커밋
+	// ----------------------------
+	if err := tx.Commit(); err != nil {
+		fmt.Println("▶ 트랜잭션 커밋 오류:", err)
+		return err
+	}
+
+	fmt.Println("▶ CreateAsset: assets와 system_info 모두 저장 완료 (asset_id =", lastID, ")")
+	return nil
 }
 
 // system
