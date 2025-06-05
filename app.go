@@ -45,6 +45,15 @@ type AssetForm struct {
 	AssetNote    string `json:"assetNote"`
 	AssetName    string `json:"assetName"`
 	AssetId      string `json:"assetId"`
+
+	SystemInfo struct {
+		CPU         system.CPUInfo         `json:"CPU"`
+		Motherboard system.MotherboardInfo `json:"Motherboard"`
+		RAM         system.RAMInfo         `json:"RAM"`
+		GPU         system.GPUInfo         `json:"GPU"`
+		Disk        system.DiskInfo        `json:"Disk"`
+		Network     system.NetworkInfo     `json:"Network"`
+	} `json:"systemInfo"`
 }
 
 var db *sql.DB
@@ -67,6 +76,12 @@ func InitDB() error {
 	}
 
 	return db.Ping()
+}
+
+func (a *App) TestAsset(data string) error {
+	fmt.Print("테스트 데이터입니다.")
+	fmt.Print(data)
+	return nil
 }
 
 func (a *App) CreateAsset(data string) error {

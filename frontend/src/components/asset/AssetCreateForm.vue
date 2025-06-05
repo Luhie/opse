@@ -28,7 +28,17 @@
         </div>
         <div class="grid-item">
           <label for="position">직급</label>
-          <input id="position" v-model="form.position" />
+          <select id="position" v-model="form.position">
+            <option>대표</option>
+            <option>이사</option>
+            <option>부장</option>
+            <option>차장</option>
+            <option>과장</option>
+            <option>대리</option>
+            <option>주임</option>
+            <option>사원</option>
+            <option>인턴</option>
+          </select>
         </div>
         <div class="grid-item">
           <label for="userNote">비고</label>
@@ -79,13 +89,15 @@
     <button type="button" @click="visible = !visible">{{ visible ? '닫기' : 'PC정보 가져오기' }}</button>
   </form>
   </div>
-  <AssetDetail v-if='visible'/>
+  <AssetDetail ref='assetDetailRef' v-if='visible'/>
 </template>
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import AssetDetail from './AssetDetail.vue'
-import { CreateAsset} from '../../../wailsjs/go/main/App'
+import { CreateAsset, TestAsset} from '../../../wailsjs/go/main/App'
+
+const assetDetailRef = ref<InstanceType<typeof AssetDetail> | null>(null)
 
 const visible = ref(false)
 
@@ -116,20 +128,47 @@ const defaultForm = {
 
 const form = reactive({ ...defaultForm })
 function submitForm() {
-    CreateAsset(JSON.stringify(form))
-    .then(() => {
-      alert('저장 완료!');
-      Object.assign(form, defaultForm) // 폼 초기화
-    })
-    .catch((err: any) => {
-      console.error('저장 오류:', err);
-      alert('저장 중 오류 발생!');
-    }); 
-  console.log('제출된 폼:', JSON.stringify(form, null, 2))
-  alert('폼이 제출되었습니다! (콘솔 확인)')
+  // 1) 자식 컴포넌트 인스턴스 가져오기
+  const hw = assetDetailRef.value
+
+  // 1-1) 인스턴스가 붙어 있지 않으면 경고하고 종료
+  if (!hw) {
+    console.warn('AssetDetail 컴포넌트가 렌더링되지 않았거나 아직 로드되지 않았습니다.')
+    alert('PC 정보가 아직 로드되지 않았습니다. 먼저 "PC정보 불러오기"를 눌러주세요.')
+    return
+  }
+    // 2) 디버깅용: 자식 인스턴스와 내부 ref 값 콘솔에 찍어 보기
+  console.log('>>> assetDetailRef.value (자식 인스턴스):', hw)
+  console.log('>>> CPUInfo ref 자체:', hw.CPUInfo)
+  console.log('>>> CPUInfo.value (실제 데이터):', hw.CPUInfo.value)
+    const systemInfo = {
+    CPU: hw?.CPUInfo,
+    Motherboard: hw?.MotherboardInfo,
+    RAM: hw?.RAMInfo,
+    GPU: hw?.GPUInfo,
+    Disk: hw?.DiskInfo,
+    Network: hw?.networkInfo
+  }
+
+  const finalPayload = {
+    ...form,
+    systemInfo
+  }
+  console.log(JSON.stringify(finalPayload))
+    TestAsset(JSON.stringify(finalPayload))
+  //   CreateAsset(JSON.stringify(finalPayload))
+  //   .then(() => {
+  //     alert('저장 완료!');
+  //     Object.assign(form, defaultForm) // 폼 초기화
+  //   })
+  //   .catch((err: any) => {
+  //     console.error('저장 오류:', err);
+  //     alert('저장 중 오류 발생!');
+  //   }); 
+  // console.log('제출된 폼:', JSON.stringify(form, null, 2))
+  // alert('폼이 제출되었습니다! (콘솔 확인)')
 }
 </script>
-
 <style scoped>
 .form-wrapper {
   display: flex;

@@ -15,3 +15,5 @@ export function GetMotherboardInfo():Promise<system.MotherboardInfo>;
 export function GetNetworkInfo():Promise<system.NetworkInfo>;
 
 export function GetRAMInfo():Promise<system.RAMInfo>;
+
+export function TestAsset(arg1:string):Promise<void>;

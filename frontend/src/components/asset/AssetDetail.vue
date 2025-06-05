@@ -24,7 +24,7 @@
             <input type='text' v-model='MotherboardInfo.serial' readonly/>
         </div>
     </fieldset>
-    <fieldset>
+    <fieldset v-if='RAMInfo'>
         <legend>RAM 정보</legend>
         <div class='grid'>
           <label>총용량</label>
@@ -48,8 +48,9 @@
               <label>속도</label>
               <input type='text' :value='ram.speedMHz' readonly />
           </div>
-        <hr>
+
         </div>
+        <hr>
     </fieldset>
     <fieldset v-if='GPUInfo'>
         <legend>GPU 정보</legend>
@@ -69,7 +70,7 @@
         <hr>
         </div>
     </fieldset>
-    <fieldset>
+    <fieldset v-if='DiskInfo'>
         <legend>DISK 정보</legend>
         <div v-for='disk in DiskInfo.drives'>
           <div class='grid'>
@@ -89,10 +90,11 @@
     </fieldset>
     <fieldset v-if='networkInfo'>
         <legend>Network 정보</legend>
-          <div class='grid'>
-              <label>Hostname</label>
-              <input type='text' :value='networkInfo.hostname' readonly />
-          </div>
+        <div class='grid'>
+            <label>Hostname</label>
+            <input type='text' :value='networkInfo.hostname' readonly />
+        </div>
+        <hr />
         <div v-for='adapter in networkInfo.adapters' :key='adapter.mac'>
           <div class='grid'>
               <label>아뎁터 이름</label>
@@ -177,6 +179,15 @@ async function fetchNetwork() {
     }
 }
 
+// 부모가 접근할 수 있도록 노출 (이름 오타나 빠뜨린 것이 없는지 확인)
+defineExpose({
+  CPUInfo,
+  MotherboardInfo,
+  RAMInfo,
+  GPUInfo,
+  DiskInfo,
+  networkInfo
+})
 
 onMounted(fetchNetwork)
 </script>
