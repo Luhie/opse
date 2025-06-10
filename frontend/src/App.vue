@@ -1,71 +1,47 @@
-<script setup lang="ts">
-import AssetCreateForm from './components/asset/AssetCreateForm.vue'
-
-</script>
 <template>
-  <AssetCreateForm />
-  <!-- <div class="wrapper">
-    <div class="input-field">
-      <label>이름</label>
-      <input v-model="name" @keyup.enter="submit" placeholder="Write name" />
-    </div>
-    <button @click="submit">확인</button>
-    <p v-if="message">{{  message  }}</P>
-  </div> -->
+  <div id="app">
+    <nav class="navbar">
+      <router-link to="/">🏠 홈</router-link>
+      <router-link to="/assets">📋 자산 목록</router-link>
+      <router-link to="/assets/create">➕ 자산 등록</router-link>
+    </nav>
+    <main>
+      <router-view />
+    </main>
+  </div>
 </template>
 
-<!-- <script setup lang="ts">
-import { ref } from 'vue'
+<script setup lang="ts">
+</script>
 
-const name = ref('')
-const message = ref('')
-
-function submit() {
-  message.value = `Hello, ${name.value}!`
-
-}
-
-</script> -->
-<!-- 
 <style scoped>
-.input-field {
-  border: 1px solid red;
-  label {
-    padding:10px;
-    color:red;
-  }
+#app {
+  min-height: 100vh;
+  background-color: #1b1b1b;
+  color: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.wrapper {
-  height: 100vh;
 
+.navbar {
+  background-color: #2a2a2a;
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* 가운데 */
-  align-items: center; /* 확장 안되고 item 가운데 */
   gap: 1rem;
-
-
-  background-color: #1B2636;
-  color: #FFFFFF;
-
+  padding: 1rem 2rem;
 }
-input {
+
+.navbar a {
+  color: #eee;
+  text-decoration: none;
   padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border-radius: 8px;
-  border: none;
-  outline: none;
+  border-radius: 6px;
 }
-button {
-  padding: 0.5rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 8px;
+
+.navbar a.router-link-active {
   background-color: #4CAF50;
   color: white;
-  border: none;
-  cursor: pointer;
 }
-button:hover {
-  background-color: #45A049;
+
+main {
+  padding: 2rem;
 }
-</style> -->
+</style>

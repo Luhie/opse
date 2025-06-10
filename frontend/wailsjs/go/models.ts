@@ -1,12 +1,31 @@
 export namespace system {
 	
+	export class Asset {
+	    assetId: string;
+	    assetName: string;
+	    itemType: string;
+	    manufacturer: string;
+	    purchaseDate: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Asset(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.assetId = source["assetId"];
+	        this.assetName = source["assetName"];
+	        this.itemType = source["itemType"];
+	        this.manufacturer = source["manufacturer"];
+	        this.purchaseDate = source["purchaseDate"];
+	    }
+	}
 	export class CPUInfo {
 	    manufacturer: string;
 	    model: string;
 	    cores: number;
 	    threads: number;
 	    clock: number;
-	    CurruntClock: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new CPUInfo(source);
@@ -19,7 +38,6 @@ export namespace system {
 	        this.cores = source["cores"];
 	        this.threads = source["threads"];
 	        this.clock = source["clock"];
-	        this.CurruntClock = source["CurruntClock"];
 	    }
 	}
 	export class DiskInfo {

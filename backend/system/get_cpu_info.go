@@ -15,8 +15,8 @@ type CPUInfo struct {
 	Model        string `json:"model"`
 	Cores        uint32 `json:"cores"`
 	Threads      uint32 `json:"threads"`
-	Clock        uint32 `json:"clock"`        // MHz
-	CurruntClock uint32 `json:"CurruntClock"` // MHz
+	Clock        uint32 `json:"clock"` // MHz
+	// CurruntClock uint32 `json:"CurruntClock"` // MHz
 }
 
 func GetCPUInfo() (*CPUInfo, error) {

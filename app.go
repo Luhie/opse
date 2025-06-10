@@ -35,6 +35,7 @@ type AssetForm struct {
 	Team         string `json:"team"`
 	Name         string `json:"name"`
 	Position     string `json:"position"`
+	Location     string `json:"location"`
 	UserNote     string `json:"userNote"`
 	Category     string `json:"category"`
 	ItemType     string `json:"itemType"`
@@ -128,16 +129,17 @@ func (a *App) CreateAsset(data string) error {
 	//    → asset_id(마지막에 생성된 PK)를 받아와서 system_info 테이블에 사용
 	res, err := tx.Exec(`
         INSERT INTO assets (
-            corporation, department, team, name, position, user_note,
+            corporation, department, team, name, position, location, user_note,
             category, item_type, quantity, model, manufacturer, purchase_date,
             `+"`usage`"+`, asset_note, asset_name, asset_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
 		form.Corporation,
 		form.Department,
 		form.Team,
 		form.Name,
 		form.Position,
+		form.Location,
 		form.UserNote,
 		form.Category,
 		form.ItemType,
@@ -279,6 +281,7 @@ func trimAssetForm(form *AssetForm) {
 	form.Team = strings.TrimSpace(form.Team)
 	form.Name = strings.TrimSpace(form.Name)
 	form.Position = strings.TrimSpace(form.Position)
+	form.Location = strings.TrimSpace(form.Location)
 	form.UserNote = strings.TrimSpace(form.UserNote)
 	form.Category = strings.TrimSpace(form.Category)
 	form.ItemType = strings.TrimSpace(form.ItemType)
@@ -335,4 +338,9 @@ func trimAssetForm(form *AssetForm) {
 		}
 		// WiFi(bool)은 건너뜁니다.
 	}
+}
+
+// Get List
+func (a *App) GetAssetList() ([]system.Asset, error) {
+	return system.GetAssetList()
 }

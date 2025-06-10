@@ -6,6 +6,10 @@ export function CreateAsset(arg1) {
   return window['go']['main']['App']['CreateAsset'](arg1);
 }
 
+export function GetAssetList() {
+  return window['go']['main']['App']['GetAssetList']();
+}
+
 export function GetCPUInfo() {
   return window['go']['main']['App']['GetCPUInfo']();
 }

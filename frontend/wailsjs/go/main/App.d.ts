@@ -4,6 +4,8 @@ import {system} from '../models';
 
 export function CreateAsset(arg1:string):Promise<void>;
 
+export function GetAssetList():Promise<Array<system.Asset>>;
+
 export function GetCPUInfo():Promise<system.CPUInfo>;
 
 export function GetDiskInfo():Promise<system.Disks>;

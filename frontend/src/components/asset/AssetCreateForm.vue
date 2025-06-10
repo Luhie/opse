@@ -1,5 +1,5 @@
 <template>
-  <div style="min-height: 100vh; display:flex; justify-content:center; align-items:center;">
+  <div style="display:flex; justify-content:center; align-items:center; border:2px dotted red;">
   <form class="form-wrapper" @submit.prevent="submitForm">
     <!-- 사용자 정보 -->
     <fieldset>
@@ -39,6 +39,10 @@
             <option>사원</option>
             <option>인턴</option>
           </select>
+        </div>
+        <div class="grid-item">
+          <label for="location">사용위치</label>
+          <input id="location" v-model="form.location" />
         </div>
         <div class="grid-item">
           <label for="userNote">비고</label>
@@ -89,13 +93,13 @@
     <button type="button" @click="visible = !visible">{{ visible ? '닫기' : 'PC정보 가져오기' }}</button>
   </form>
   </div>
-  <AssetDetail ref='assetDetailRef' v-if='visible'/>
+  <AssetDetail ref='assetDetailRef' v-show='visible'/>
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref } from 'vue' 
 import AssetDetail from './AssetDetail.vue'
-import { CreateAsset, TestAsset} from '../../../wailsjs/go/main/App'
+import { CreateAsset, TestAsset} from '@wails/go/main/App'
 
 const assetDetailRef = ref<InstanceType<typeof AssetDetail> | null>(null)
 
@@ -111,7 +115,8 @@ const defaultForm = {
   department: '',
   team: '',
   name: '',
-  position: '',
+  position: '대리',
+  location: '',
   userNote: '',
 
   category: '비품',
@@ -224,7 +229,7 @@ label {
     /* grid-column: 2/4; */
     /* background-color:red; */
   }
-  &:nth-child(6){
+  &:nth-child(7){
     grid-column: 1/4;
     /* background-color:red; */
   }

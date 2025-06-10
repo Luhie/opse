@@ -115,7 +115,7 @@
 </template>
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue'
-import { GetCPUInfo,GetMotherboardInfo,GetRAMInfo,GetGPUInfo,GetDiskInfo,GetNetworkInfo } from '../../../wailsjs/go/main/App'
+import { GetCPUInfo,GetMotherboardInfo,GetRAMInfo,GetGPUInfo,GetDiskInfo,GetNetworkInfo } from '@wails/go/main/App'
 
 const CPUInfo = ref<any>(null)
 const MotherboardInfo = ref<any>(null)
@@ -125,6 +125,8 @@ const DiskInfo = ref<any>(null)
 
 GetCPUInfo()
 .then((result: any) => {
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>')
+    console.log(result)
     CPUInfo.value = result
 })
 .catch((err: any) => {
