@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AssetCreateForm from '../../components/asset/AssetCreateForm.vue';
+import AssetCreateForm from '@/components/asset/AssetCreateForm.vue';
 
 </script>
 

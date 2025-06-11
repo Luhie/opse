@@ -13,9 +13,13 @@ export function GetDiskInfo():Promise<system.Disks>;
 
 export function GetGPUInfo():Promise<system.GPUs>;
 
+export function GetHwpInfo():Promise<software.HwpInfo>;
+
 export function GetMotherboardInfo():Promise<system.MotherboardInfo>;
 
 export function GetNetworkInfo():Promise<system.NetworkInfo>;
+
+export function GetOfficeInfo():Promise<Array<software.OfficeInfo>>;
 
 export function GetRAMInfo():Promise<system.RAMInfo>;
 

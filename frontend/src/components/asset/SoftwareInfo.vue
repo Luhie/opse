@@ -35,8 +35,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, defineEmits, defineExpose } from 'vue';
 import { GetWindowsInfo } from '@wails/go/main/App';
+import { waitWailsReady } from '@/utils/wailsReady'
+
 
 interface WindowsInfo {
   caption: string;
@@ -54,16 +56,26 @@ interface WindowsInfo {
 
 const windowsInfo = ref<WindowsInfo | null>(null);
 
+const emit = defineEmits<{
+  (e: 'loaded', info: WindowsInfo): void
+}>()
+
+defineExpose({
+    windowsInfo
+})
+
 const fetchWindowsInfo = async () => {
   try {
     windowsInfo.value = await GetWindowsInfo();
+    if(windowsInfo.value) emit('loaded', windowsInfo.value)
   } catch (error) {
     console.error('Windows 정보 불러오기 실패:', error);
   }
 }
 
-onMounted(() => {
-  fetchWindowsInfo();
+onMounted(async () => {
+    await waitWailsReady();
+    fetchWindowsInfo();
 });
 </script>
 

@@ -1,5 +1,45 @@
 export namespace software {
 	
+	export class HwpInfo {
+	    product_name: string;
+	    version: string;
+	    install_path: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new HwpInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.product_name = source["product_name"];
+	        this.version = source["version"];
+	        this.install_path = source["install_path"];
+	    }
+	}
+	export class OfficeInfo {
+	    name: string;
+	    version: string;
+	    partial_product_key: string;
+	    licensed: number;
+	    grace_period: number;
+	    estimated_expire_date: string;
+	    cracked: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new OfficeInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.version = source["version"];
+	        this.partial_product_key = source["partial_product_key"];
+	        this.licensed = source["licensed"];
+	        this.grace_period = source["grace_period"];
+	        this.estimated_expire_date = source["estimated_expire_date"];
+	        this.cracked = source["cracked"];
+	    }
+	}
 	export class WindowsInfo {
 	    caption: string;
 	    version: string;

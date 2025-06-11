@@ -1,3 +1,141 @@
+<script setup lang="ts">
+import { reactive, ref, watch } from 'vue' 
+import AssetDetail from '@/components/asset/AssetDetail.vue'
+
+import OfficeInfo from '@/components/asset/OfficeInfo.vue';
+import SoftwareInfo from '@/components/asset/SoftwareInfo.vue';
+import { CreateAsset, TestAsset} from '@wails/go/main/App'
+
+const assetDetailRef = ref<InstanceType<typeof AssetDetail> | null>(null)
+
+
+const visiblePC = ref(false)
+const visibleSoftware = ref(false)
+
+const today = new Date()
+const year = today.getFullYear()
+const month = (today.getMonth()+1).toString().padStart(2,'0')
+const date = today.getDate().toString().padStart(2,'0')
+const day = `${year}-${month}-${date}`
+const defaultForm = {
+  corporation: '솜인터내셔널',
+  department: '',
+  team: '',
+  name: '',
+  position: '대리',
+  location: '',
+  userNote: '',
+
+  category: '비품',
+  itemType: 'PC본체',
+  quantity: 1,
+  model: '',
+  manufacturer: '',
+  purchaseDate: day,
+  usage: 'O',
+  assetNote: '',
+  assetName: '',
+  assetId: '',
+};
+
+// 
+interface WindowsInfo {
+  caption: string;
+  version: string;
+  serial_number: string;
+  product_key: string;
+  partial_product_key: string;
+  licensed: number;
+  product_channel: string;
+  kms_machine: string;
+  grace_period_remaining: number;
+  estimated_expire_date: string;
+  cracked: number;
+}
+interface OfficeInfo {
+  name: string;
+  version: string;
+  partial_product_key: string;
+  licensed: number;
+  grace_period: number;
+  estimated_expire_date: string;
+  cracked: number;
+}
+// 소프트웨어 정보 저장용 state 변수
+const windowsInfo = ref<WindowsInfo | null>(null);
+const officeList = ref<OfficeInfo[]>([]);
+
+const GetWindowsInfo = (info: WindowsInfo) => {
+  console.log('windowInfo: ', info);
+}
+const GetOfficeInfoMation = (info: OfficeInfo) => {
+  console.log('windowInfo: ', info);
+}
+const handleWindowsLoaded = (info: WindowsInfo) => {
+  // GetWindowsInfo(info)
+    windowsInfo.value = info;
+}
+
+const handleOfficeLoaded = (infoList: OfficeInfo[]) => {
+  // infoList.forEach((info) => {
+  //   GetOfficeInfoMation(info);
+  // });
+    officeList.value = infoList;
+};
+
+const form = reactive({ ...defaultForm })
+function submitForm() {
+  // 1) 자식 컴포넌트 인스턴스 가져오기
+  const hw = assetDetailRef.value
+
+  // 1-1) 인스턴스가 붙어 있지 않으면 경고하고 종료
+  if (!hw) {
+    alert("PC 정보를 먼저 불러와 주세요");
+    return;
+  }
+
+    // 2) 디버깅용: 자식 인스턴스와 내부 ref 값 콘솔에 찍어 보기
+  // console.log('>>> assetDetailRef.value (자식 인스턴스):', hw)
+  // console.log('>>> CPUInfo ref 자체:', hw.CPUInfo)
+    const systemInfo = {
+    CPU: hw?.CPUInfo,
+    Motherboard: hw?.MotherboardInfo,
+    RAM: hw?.RAMInfo,
+    GPU: hw?.GPUInfo,
+    Disk: hw?.DiskInfo,
+    Network: hw?.networkInfo
+  }
+
+  const finalPayload = {
+    ...form,
+    systemInfo,
+    windowsInfo: windowsInfo.value,
+    officeList: officeList.value
+
+  }
+  console.log(JSON.stringify(finalPayload))
+    TestAsset(JSON.stringify(finalPayload))
+  CreateAsset(JSON.stringify(finalPayload))
+  .then(() => {
+    alert('저장 완료!');
+    Object.assign(form, defaultForm) // 폼 초기화
+  })
+  .catch((err: any) => {
+    console.error('저장 오류:', err);
+    alert('저장 중 오류 발생!');
+  }); 
+  console.log('제출된 폼:', JSON.stringify(form, null, 2))
+  alert('폼이 제출되었습니다! (콘솔 확인)')
+}
+
+const sendSoftware = (event: MouseEvent) => {
+  if(visibleSoftware.value){
+    // event.preventDefault()
+  }
+
+}
+</script>
+
 <template>
   <div style="display:flex; justify-content:center; align-items:center; border:2px dotted red;">
   <form class="form-wrapper" @submit.prevent="submitForm">
@@ -89,91 +227,18 @@
       </div>
     </fieldset>
 
-    <button type="submit">제출</button>
-    <button type="button" @click="visible = !visible">{{ visible ? '닫기' : 'PC정보 가져오기' }}</button>
+    <button :class="visibleSoftware ? 'btn-send-software' : ''" type="submit" id='submitBtn' @click="sendSoftware">제출</button>
+    <button type="button" @click="visiblePC = !visiblePC">{{ visiblePC ? '닫기' : 'PC정보 가져오기' }}</button>
+    <button type="button" @click="visibleSoftware = !visibleSoftware">{{ visibleSoftware ? '닫기' : 'Software 정보 가져오기' }}</button>
   </form>
   </div>
-  <AssetDetail ref='assetDetailRef' v-show='visible'/>
+  <AssetDetail ref='assetDetailRef' v-show='visiblePC'/>
+
+  <SoftwareInfo @loaded="handleWindowsLoaded" v-show='visibleSoftware' style='margin-top:20px;'/>
+  <OfficeInfo @loaded="handleOfficeLoaded" v-show='visibleSoftware' style='margin-top:20px;' />
+
 </template>
 
-<script setup lang="ts">
-import { reactive, ref } from 'vue' 
-import AssetDetail from './AssetDetail.vue'
-import { CreateAsset, TestAsset} from '@wails/go/main/App'
-
-const assetDetailRef = ref<InstanceType<typeof AssetDetail> | null>(null)
-
-const visible = ref(false)
-
-const today = new Date()
-const year = today.getFullYear()
-const month = (today.getMonth()+1).toString().padStart(2,'0')
-const date = today.getDate().toString().padStart(2,'0')
-const day = `${year}-${month}-${date}`
-const defaultForm = {
-  corporation: '솜인터내셔널',
-  department: '',
-  team: '',
-  name: '',
-  position: '대리',
-  location: '',
-  userNote: '',
-
-  category: '비품',
-  itemType: 'PC본체',
-  quantity: 1,
-  model: '',
-  manufacturer: '',
-  purchaseDate: day,
-  usage: 'O',
-  assetNote: '',
-  assetName: '',
-  assetId: '',
-};
-
-const form = reactive({ ...defaultForm })
-function submitForm() {
-  // 1) 자식 컴포넌트 인스턴스 가져오기
-  const hw = assetDetailRef.value
-
-  // 1-1) 인스턴스가 붙어 있지 않으면 경고하고 종료
-  if (!hw) {
-    console.warn('AssetDetail 컴포넌트가 렌더링되지 않았거나 아직 로드되지 않았습니다.')
-    alert('PC 정보가 아직 로드되지 않았습니다. 먼저 "PC정보 불러오기"를 눌러주세요.')
-    return
-  }
-    // 2) 디버깅용: 자식 인스턴스와 내부 ref 값 콘솔에 찍어 보기
-  console.log('>>> assetDetailRef.value (자식 인스턴스):', hw)
-  console.log('>>> CPUInfo ref 자체:', hw.CPUInfo)
-  console.log('>>> CPUInfo.value (실제 데이터):', hw.CPUInfo.value)
-    const systemInfo = {
-    CPU: hw?.CPUInfo,
-    Motherboard: hw?.MotherboardInfo,
-    RAM: hw?.RAMInfo,
-    GPU: hw?.GPUInfo,
-    Disk: hw?.DiskInfo,
-    Network: hw?.networkInfo
-  }
-
-  const finalPayload = {
-    ...form,
-    systemInfo
-  }
-  console.log(JSON.stringify(finalPayload))
-    // TestAsset(JSON.stringify(finalPayload))
-  CreateAsset(JSON.stringify(finalPayload))
-  .then(() => {
-    alert('저장 완료!');
-    Object.assign(form, defaultForm) // 폼 초기화
-  })
-  .catch((err: any) => {
-    console.error('저장 오류:', err);
-    alert('저장 중 오류 발생!');
-  }); 
-  console.log('제출된 폼:', JSON.stringify(form, null, 2))
-  alert('폼이 제출되었습니다! (콘솔 확인)')
-}
-</script>
 <style scoped>
 .form-wrapper {
   display: flex;
@@ -277,5 +342,13 @@ button {
 }
 button:hover {
   background-color: #45a049;
+}
+
+
+button.btn-send-software {
+  background-color: #fdb0ce;
+}
+button.btn-send-software:hover {
+  background-color: #ff9ac0;
 }
 </style>

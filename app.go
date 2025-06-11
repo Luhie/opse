@@ -57,6 +57,9 @@ type AssetForm struct {
 		Disk        system.Disks           `json:"Disk"`
 		Network     system.NetworkInfo     `json:"Network"`
 	} `json:"systemInfo"`
+
+	WindowsInfo software.WindowsInfo  `json:"windowsInfo"` // ✅ 추가
+	OfficeList  []software.OfficeInfo `json:"officeList"`  // ✅ 추가
 }
 
 /**********************************
@@ -100,34 +103,21 @@ func (a *App) TestAsset(data string) error {
 }
 
 func (a *App) CreateAsset(data string) error {
-	// ----------------------------
-	// 1) JSON 문자열 언마샬링
-	// ----------------------------
 	var form AssetForm
 	if err := json.Unmarshal([]byte(data), &form); err != nil {
 		fmt.Println("▶ CreateAsset Unmarshal 오류:", err)
 		return err
 	}
 
-	// ----------------------------
-	// 2) Trim 처리 (이미 구현했다면 호출만)
-	//    → form 내부의 모든 문자열 필드 앞뒤 공백 제거
-	// ----------------------------
 	trimAssetForm(&form)
 
-	// ----------------------------
-	// 3) DB 트랜잭션 시작
-	// ----------------------------
 	tx, err := db.Begin()
 	if err != nil {
 		fmt.Println("▶ 트랜잭션 시작 오류:", err)
 		return err
 	}
 
-	// ----------------------------
-	// 4) assets 테이블에 기본 정보 INSERT
-	// ----------------------------
-	//    → asset_id(마지막에 생성된 PK)를 받아와서 system_info 테이블에 사용
+	// 1️⃣ assets 테이블 저장
 	res, err := tx.Exec(`
         INSERT INTO assets (
             corporation, department, team, name, position, location, user_note,
@@ -135,23 +125,10 @@ func (a *App) CreateAsset(data string) error {
             `+"`usage`"+`, asset_note, asset_name, asset_id
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
-		form.Corporation,
-		form.Department,
-		form.Team,
-		form.Name,
-		form.Position,
-		form.Location,
-		form.UserNote,
-		form.Category,
-		form.ItemType,
-		form.Quantity,
-		form.Model,
-		form.Manufacturer,
-		form.PurchaseDate, // MySQL DATE 타입에 맞춘 문자열
-		form.Usage,
-		form.AssetNote,
-		form.AssetName,
-		form.AssetId,
+		form.Corporation, form.Department, form.Team, form.Name, form.Position,
+		form.Location, form.UserNote, form.Category, form.ItemType, form.Quantity,
+		form.Model, form.Manufacturer, form.PurchaseDate, form.Usage,
+		form.AssetNote, form.AssetName, form.AssetId,
 	)
 	if err != nil {
 		tx.Rollback()
@@ -159,81 +136,26 @@ func (a *App) CreateAsset(data string) error {
 		return err
 	}
 
-	// 마지막으로 생성된 PK (assets.id) 획득
 	lastID, err := res.LastInsertId()
 	if err != nil {
 		tx.Rollback()
-		fmt.Println("▶ LastInsertId 오류:", err)
 		return err
 	}
 
-	// ----------------------------
-	// 5) system_info 테이블에 JSON 별도 INSERT
-	// ----------------------------
-	//    form.SystemInfo 내부의 각 부분(CPU, Motherboard, RAM, GPU, Disk, Network)을
-	//    json.Marshal 한 뒤, asset_id=lastID 값과 함께 INSERT
+	// 2️⃣ system_info JSON 저장 (기존 유지)
+	cpuJSON, _ := json.Marshal(form.SystemInfo.CPU)
+	mbJSON, _ := json.Marshal(form.SystemInfo.Motherboard)
+	ramJSON, _ := json.Marshal(form.SystemInfo.RAM)
+	gpuJSON, _ := json.Marshal(form.SystemInfo.GPU)
+	diskJSON, _ := json.Marshal(form.SystemInfo.Disk)
+	netJSON, _ := json.Marshal(form.SystemInfo.Network)
 
-	// 5-1) CPU 정보만 JSON으로
-	cpuJSON, err := json.Marshal(form.SystemInfo.CPU)
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("▶ CPU JSON 마샬링 오류:", err)
-		return err
-	}
-
-	// 5-2) Motherboard 정보만 JSON으로
-	mbJSON, err := json.Marshal(form.SystemInfo.Motherboard)
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("▶ Motherboard JSON 마샬링 오류:", err)
-		return err
-	}
-
-	// 5-3) RAM 전체 정보 (슬라이스 포함) JSON으로
-	ramJSON, err := json.Marshal(form.SystemInfo.RAM)
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("▶ RAM JSON 마샬링 오류:", err)
-		return err
-	}
-
-	// 5-4) GPU 전체 정보 JSON으로
-	gpuJSON, err := json.Marshal(form.SystemInfo.GPU)
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("▶ GPU JSON 마샬링 오류:", err)
-		return err
-	}
-
-	// 5-5) Disk 전체 정보 JSON으로
-	diskJSON, err := json.Marshal(form.SystemInfo.Disk)
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("▶ Disk JSON 마샬링 오류:", err)
-		return err
-	}
-
-	// 5-6) Network 전체 정보 JSON으로
-	netJSON, err := json.Marshal(form.SystemInfo.Network)
-	if err != nil {
-		tx.Rollback()
-		fmt.Println("▶ Network JSON 마샬링 오류:", err)
-		return err
-	}
-
-	// 이제 system_info 테이블로 INSERT
 	_, err = tx.Exec(`
-        INSERT INTO system_info (
-            asset_id, cpu, motherboard, ram, gpu, disk, network
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO system_info (asset_id, cpu, motherboard, ram, gpu, disk, network)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `,
-		lastID,
-		string(cpuJSON),
-		string(mbJSON),
-		string(ramJSON),
-		string(gpuJSON),
-		string(diskJSON),
-		string(netJSON),
+		lastID, string(cpuJSON), string(mbJSON), string(ramJSON),
+		string(gpuJSON), string(diskJSON), string(netJSON),
 	)
 	if err != nil {
 		tx.Rollback()
@@ -241,15 +163,49 @@ func (a *App) CreateAsset(data string) error {
 		return err
 	}
 
-	// ----------------------------
-	// 6) 트랜잭션 커밋
-	// ----------------------------
+	// 3️⃣ windows_info 저장 추가
+	_, err = tx.Exec(`
+        INSERT INTO windows_info (
+            asset_id, caption, version, serial_number, product_key, partial_product_key, licensed,
+            product_channel, kms_machine, grace_period_remaining, estimated_expire_date, cracked
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+		lastID,
+		form.WindowsInfo.Caption, form.WindowsInfo.Version, form.WindowsInfo.SerialNumber,
+		form.WindowsInfo.ProductKey, form.WindowsInfo.PartialProductKey, form.WindowsInfo.Licensed,
+		form.WindowsInfo.ProductChannel, form.WindowsInfo.KMSMachine,
+		form.WindowsInfo.GracePeriodRemaining, form.WindowsInfo.EstimatedExpireDate, form.WindowsInfo.Cracked,
+	)
+	if err != nil {
+		tx.Rollback()
+		fmt.Println("▶ windows_info INSERT 오류:", err)
+		return err
+	}
+
+	// 4️⃣ office_info 저장 추가
+	for _, office := range form.OfficeList {
+		_, err = tx.Exec(`
+            INSERT INTO office_info (
+                asset_id, name, version, partial_product_key, licensed, grace_period, estimated_expire_date, cracked
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `,
+			lastID, office.Name, office.Version, office.PartialProductKey,
+			office.Licensed, office.GracePeriod, office.EstimatedExpireDate, office.Cracked,
+		)
+		if err != nil {
+			tx.Rollback()
+			fmt.Println("▶ office_info INSERT 오류:", err)
+			return err
+		}
+	}
+
+	// 트랜잭션 커밋
 	if err := tx.Commit(); err != nil {
 		fmt.Println("▶ 트랜잭션 커밋 오류:", err)
 		return err
 	}
 
-	fmt.Println("▶ CreateAsset: assets와 system_info 모두 저장 완료 (asset_id =", lastID, ")")
+	fmt.Println("▶ CreateAsset 전체 저장 완료 (asset_id =", lastID, ")")
 	return nil
 }
 
@@ -341,9 +297,17 @@ func trimAssetForm(form *AssetForm) {
 	}
 }
 
-// 새로운 Windows 소프트웨어 정보 API 추가
+/*
+Software
+*/
 func (a *App) GetWindowsInfo() (*software.WindowsInfo, error) {
 	return software.GetWindowsInfo()
+}
+func (a *App) GetOfficeInfo() ([]software.OfficeInfo, error) {
+	return software.GetOfficeInfo()
+}
+func (a *App) GetHwpInfo() (*software.HwpInfo, error) {
+	return software.GetHwpInfo()
 }
 
 // Get List

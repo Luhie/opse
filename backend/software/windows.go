@@ -2,7 +2,6 @@ package software
 
 import (
 	"errors"
-	"time"
 
 	"github.com/StackExchange/wmi"
 	"golang.org/x/sys/windows/registry"
@@ -67,18 +66,18 @@ func GetWindowsLicenseDetail(info *WindowsInfo) {
 			info.PartialProductKey = p.PartialProductKey
 			info.ProductChannel = p.ProductKeyChannel
 			info.GracePeriodRemaining = p.GracePeriodRemaining
-			info.EstimatedExpireDate = calculateExpireDate(p.GracePeriodRemaining)
+			info.EstimatedExpireDate = CalculateExpireDate(p.GracePeriodRemaining)
 			info.Cracked = DetectCracked(info)
 			break
 		}
 	}
 }
 
-func calculateExpireDate(gracePeriod uint32) string {
-	now := time.Now()
-	expire := now.Add(time.Duration(gracePeriod) * 24 * time.Hour)
-	return expire.Format("2006-01-02")
-}
+// func calculateExpireDate(gracePeriod uint32) string {
+// 	now := time.Now()
+// 	expire := now.Add(time.Duration(gracePeriod) * 24 * time.Hour)
+// 	return expire.Format("2006-01-02")
+// }
 
 func GetKMSMachine(info *WindowsInfo) {
 	var service []struct {

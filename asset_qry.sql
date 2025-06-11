@@ -43,3 +43,31 @@ CREATE TABLE system_info (
       REFERENCES assets(id)
       ON DELETE CASCADE
 );
+CREATE TABLE windows_info (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    asset_id INT,
+    caption VARCHAR(255),
+    version VARCHAR(100),
+    serial_number VARCHAR(255),
+    product_key VARCHAR(255),
+    partial_product_key VARCHAR(100),
+    licensed INT,
+    product_channel VARCHAR(255),
+    kms_machine VARCHAR(255),
+    grace_period_remaining INT,
+    estimated_expire_date VARCHAR(50),
+    cracked INT,
+    FOREIGN KEY (asset_id) REFERENCES assets(id)
+);
+CREATE TABLE office_info (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    asset_id INT,
+    name VARCHAR(255),
+    version VARCHAR(100),
+    partial_product_key VARCHAR(100),
+    licensed INT,
+    grace_period INT,
+    estimated_expire_date VARCHAR(50),
+    cracked INT,
+    FOREIGN KEY (asset_id) REFERENCES assets(id)
+);

@@ -22,12 +22,20 @@ export function GetGPUInfo() {
   return window['go']['main']['App']['GetGPUInfo']();
 }
 
+export function GetHwpInfo() {
+  return window['go']['main']['App']['GetHwpInfo']();
+}
+
 export function GetMotherboardInfo() {
   return window['go']['main']['App']['GetMotherboardInfo']();
 }
 
 export function GetNetworkInfo() {
   return window['go']['main']['App']['GetNetworkInfo']();
+}
+
+export function GetOfficeInfo() {
+  return window['go']['main']['App']['GetOfficeInfo']();
 }
 
 export function GetRAMInfo() {
