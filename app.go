@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"opse/backend/software"
 	"opse/backend/system"
 )
 
@@ -338,6 +339,11 @@ func trimAssetForm(form *AssetForm) {
 		}
 		// WiFi(bool)은 건너뜁니다.
 	}
+}
+
+// 새로운 Windows 소프트웨어 정보 API 추가
+func (a *App) GetWindowsInfo() (*software.WindowsInfo, error) {
+	return software.GetWindowsInfo()
 }
 
 // Get List

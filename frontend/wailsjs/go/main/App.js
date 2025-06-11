@@ -34,6 +34,10 @@ export function GetRAMInfo() {
   return window['go']['main']['App']['GetRAMInfo']();
 }
 
+export function GetWindowsInfo() {
+  return window['go']['main']['App']['GetWindowsInfo']();
+}
+
 export function TestAsset(arg1) {
   return window['go']['main']['App']['TestAsset'](arg1);
 }

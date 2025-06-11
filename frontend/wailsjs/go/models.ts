@@ -1,3 +1,40 @@
+export namespace software {
+	
+	export class WindowsInfo {
+	    caption: string;
+	    version: string;
+	    serial_number: string;
+	    product_key: string;
+	    partial_product_key: string;
+	    licensed: number;
+	    product_channel: string;
+	    kms_machine: string;
+	    grace_period_remaining: number;
+	    estimated_expire_date: string;
+	    cracked: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WindowsInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.caption = source["caption"];
+	        this.version = source["version"];
+	        this.serial_number = source["serial_number"];
+	        this.product_key = source["product_key"];
+	        this.partial_product_key = source["partial_product_key"];
+	        this.licensed = source["licensed"];
+	        this.product_channel = source["product_channel"];
+	        this.kms_machine = source["kms_machine"];
+	        this.grace_period_remaining = source["grace_period_remaining"];
+	        this.estimated_expire_date = source["estimated_expire_date"];
+	        this.cracked = source["cracked"];
+	    }
+	}
+
+}
+
 export namespace system {
 	
 	export class Asset {
